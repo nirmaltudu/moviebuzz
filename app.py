@@ -8,11 +8,11 @@ This file creates your application.
 
 import os
 from flask import Flask, render_template, request, redirect, url_for
+import lib.mongo as mongo
 
 app = Flask(__name__)
 
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'this_should_be_configured')
-
 
 ###
 # Routing for your application.
@@ -29,6 +29,9 @@ def about():
     """Render the website's about page."""
     return render_template('about.html')
 
+@app.route('/graph_data')
+def get_graph_data():
+    return mongo.get_graph_data()
 
 ###
 # The functions below should be applicable to all Flask apps.

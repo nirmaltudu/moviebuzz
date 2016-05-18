@@ -1,8 +1,7 @@
 # Virtualenv
-env
+venv
 .Python
 include
-lib
 
 # Python Packages
 *.egg
