@@ -1,6 +1,8 @@
+import time
 from apiclient.discovery import build  
 import mongo
 from datetime import datetime
+from collections import defaultdict
 
 DEVELOPER_KEY = "AIzaSyCW9a_Dq3EtJFisysq5rtiQ3iFI_2OZkPU"  
 YOUTUBE_API_SERVICE_NAME = "youtube"  
@@ -35,3 +37,37 @@ def get_stat(vid):
 	except KeyError:
 		return {}
 	return stat
+
+def get_comment_threads():
+	mov = mongo._collection_youtube_movie_trailers().find_one()
+	names = dict()
+	for k in mov.keys():
+		if k == '_id':
+			continue	
+		names[k] = mov[k]['name']
+
+	allComments = defaultdict(str)
+	tempComments = list()
+	for video in names.keys():
+		time.sleep(1.0)
+  		results = _youtube_client().commentThreads().list(
+    		part="snippet",
+    		videoId=video,
+    		textFormat="plainText",
+    		maxResults=20,
+    		order='relevance'
+  		).execute()
+
+  		
+  		for item in results["items"]:
+  			comment = item["snippet"]["topLevelComment"]
+  			tempComment = dict(videoId=video, videoName=names[video],
+  								nbrReplies = item["snippet"]["totalReplyCount"],
+  								author = comment["snippet"]["authorDisplayName"],
+  								likes = comment["snippet"]["likeCount"],
+  								publishedAt=comment["snippet"]["publishedAt"],
+  								text = comment["snippet"]["textDisplay"].encode('utf-8').strip())
+  			allComments[video] += tempComment['text'].lower().decode('utf-8').strip(":,.!?")
+  			tempComments.append(tempComment)
+  	
+  	return allComments

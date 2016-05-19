@@ -69,16 +69,22 @@ def get_graph_data():
 		names[k] = mov[k]['name']
 
 	view_counts = list()
-	c = 1
-	for rec in _collection_youtube_statistics().find():
+	diff_counts = list()
+	recs = [i for i in _collection_youtube_statistics().find()]
+	# return recs
+	c = 0
+	for rec in recs:
 		rr = dict()
 		for k in rec.keys():
 			if k == '_id':
 				continue
 			name = names[k]
 			rr['timestamp'] = rec[k]['timestamp']
-			rr[name] = rec[k]['viewCount']
+			# rr[name] = rec[k]['viewCount']
+			diff = int(rec[k]['viewCount']) - int(recs[c-1][k]['viewCount'])
+			rr[name] = diff
 		view_counts.append(rr)
+		c += 1
 	ret = dict()
 	ret['data'] = view_counts
 	ret['xkey'] = 'timestamp'
